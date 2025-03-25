@@ -1,0 +1,4 @@
+mysql:
+  dsn: "proj65_appzab:proj65@appzab@tcp(202.28.34.197)/proj65_appzab?collation=utf8mb4_unicode_ci&parseTime=true"
+# ถ้าอยากเปลี่ยน URL ของ DB  เปลี่ยนแค่ตรงนี้ proj65_appzab:proj65@appzab@tcp(202.28.34.197)/proj65_appzab 
+# /proj65_appzab? ==> DB Name
