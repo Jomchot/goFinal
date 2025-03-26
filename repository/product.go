@@ -20,15 +20,6 @@ func NewProductRepository(gormdb *gorm.DB) ProductRepository {
 	return &productDB{db: gormdb}
 }
 
-//	func (connect userDB) GetUserByEmail(email string) (*model.Customer, error) {
-//		user := model.Customer{}
-//		result := connect.db.Where("email = ?", email).First(&user)
-//		if result.Error != nil {
-//			return nil, result.Error
-//		}
-//		return &user, nil
-//	}
-
 func (connect *productDB) GetProduct(description string, minPrice float64, maxPrice float64) (*[]model.Product, error) {
 	products := []model.Product{}
 	result := connect.db.Where("description LIKE ? AND price BETWEEN ? AND ?", "%"+description+"%", minPrice, maxPrice).Find(&products)

@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"goFinal/model"
 	"goFinal/service"
 	"net/http"
 
@@ -15,26 +14,30 @@ func NewProduct(router *gin.Engine, gormdb *gorm.DB) {
 	dbProduct = gormdb
 	product := router.Group("/product")
 	{
-		product.GET("", getAllUsers)
-		product.PUT("/password", updatePassord)
+		product.GET("/search", getProduct)
 	}
 
 }
 
-func getProduct(ctx *gin.Context) {
-	user := model.Customer{}
-	err := ctx.ShouldBindJSON(&user) //รับค่าจาก body
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	email := user.Email
-	service := service.NewUsersService(dbProduct)
+type Search struct {
+	Description string  `json:"description"`
+	MinPrice    float64 `json:"minPrice"`
+	MaxPrice    float64 `json:"maxPrice"`
+}
 
-	userAuth, err := service.PostAuthLogin(email, user.Password)
+func getProduct(ctx *gin.Context) {
+	var search Search
+	err := ctx.ShouldBindJSON(&search) //รับค่าจาก body
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	ctx.JSON(http.StatusOK, userAuth)
+
+	service := service.NewProductService(dbProduct)
+	ProductSearch, err := service.GetProduct(search.Description, search.MinPrice, search.MaxPrice)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, ProductSearch)
 }

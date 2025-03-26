@@ -33,6 +33,8 @@ func StartServer() {
 
 	// เรียกใช้ controller
 	NewUsers(router, db)
+	NewProduct(router, db)
+	NewCardItem(router, db)
 
 	router.Run()
 }
