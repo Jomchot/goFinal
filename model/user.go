@@ -4,22 +4,19 @@ import (
 	"time"
 )
 
-type User struct {
-	ID           uint      `gorm:"column:uid;primaryKey;autoIncrement"`
-	UserName     string    `gorm:"column:user_name;size:255;not null"`
-	Email        string    `gorm:"column:email;size:255;not null"`
-	Password     string    `gorm:"column:password;size:255;not null"`
-	Gender       string    `gorm:"column:user_gender;size:10;not null"`
-	Birthday     time.Time `gorm:"column:user_birthday;not null"`
-	Image        string    `gorm:"column:user_img;size:1000;not null"`
-	FavoriteFood string    `gorm:"column:favorite_food;size:500;not null"`
-	UserType     int       `gorm:"column:user_type;not null"`
-	GoogleID     string    `gorm:"column:googleid;not null"`
-	Profile      string    `gorm:"column:user_profile;not null"`
-	Cluster      int       `gorm:"column:user_cluster;not null"`
+type Customer struct {
+	CustomerID  uint      `gorm:"column:customer_id;primaryKey;autoIncrement"`
+	FirstName   string    `gorm:"column:first_name;size:255;not null"`
+	LastName    string    `gorm:"column:last_name;size:255;not null"`
+	Email       string    `gorm:"column:email;size:255;not null"`
+	PhoneNumber string    `gorm:"column:phone_number;size:20;not null"`
+	Address     string    `gorm:"column:address;size:255;not null"`
+	Password    string    `gorm:"column:password;size:255;not null"`
+	CreatedAt   time.Time `gorm:"column:created_at;not null;autoCreateTime"`
+	UpdatedAt   time.Time `gorm:"column:updated_at;not null;autoUpdateTime"`
 }
 
-func (User) TableName() string {
+func (Customer) TableName() string {
 	// Table name in database
-	return "users"
+	return "customer"
 }

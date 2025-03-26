@@ -19,10 +19,13 @@ func NewUsers(router *gin.Engine, gormdb *gorm.DB) {
 	{
 		user.GET("", getAllUsers)
 		user.GET("/id", getUserById)
-		user.GET("/email", getUserByEmail)
 		user.POST("", insertUser)
 		user.PATCH("", updateUserById)
 		user.PATCH("/email", updateUserByEmail)
+	}
+	auth := router.Group("/auth")
+	{
+		auth.POST("/login", postUserByEmail)
 	}
 }
 
@@ -48,20 +51,26 @@ func getUserById(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, getUser)
 }
 
-func getUserByEmail(ctx *gin.Context) {
-	service := service.NewUsersService(db)
-	email := ctx.Query("email")
-
-	user, err := service.GetUserByEmail(email)
+func postUserByEmail(ctx *gin.Context) {
+	user := model.Customer{}
+	err := ctx.ShouldBindJSON(&user) //รับค่าจาก body
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	ctx.JSON(http.StatusOK, user)
+	email := user.Email
+	service := service.NewUsersService(db)
+
+	userAuth, err := service.PostAuthLogin(email, user.Password)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, userAuth)
 }
 
 func updateUserByEmail(ctx *gin.Context) {
-	user := model.User{}
+	user := model.Customer{}
 	err := ctx.ShouldBindJSON(&user) //รับค่าจาก body
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -77,7 +86,7 @@ func updateUserByEmail(ctx *gin.Context) {
 }
 
 func updateUserById(ctx *gin.Context) {
-	user := model.User{}
+	user := model.Customer{}
 
 	idx := ctx.Query("id")
 	id, err := strconv.Atoi(idx)
@@ -97,7 +106,7 @@ func updateUserById(ctx *gin.Context) {
 
 func insertUser(ctx *gin.Context) {
 	service := service.NewUsersService(db)
-	user := model.User{}
+	user := model.Customer{}
 	err := ctx.ShouldBindJSON(&user)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
