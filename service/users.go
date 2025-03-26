@@ -12,11 +12,9 @@ import (
 
 type showDataService interface {
 	GetAllUsers() *[]model.Customer
-	GetUserById(id int) (*model.Customer, error)
 	PostAuthLogin(email string, password string) (*DataAuth, error)
 	InsertUser(data model.Customer) (int64, error)
-	UpdateUserByID(id int, data model.Customer) (int, error)
-	UpdateUserByEmail(email string, data model.Customer) (int, error)
+	UpdatePasswordByEmail(email string, password string) (int, error)
 }
 
 func NewUsersService(gormdb *gorm.DB) showDataService {
@@ -38,18 +36,18 @@ type DataAuth struct {
 	UpdatedAt   time.Time
 }
 
-func (c showData) UpdateUserByID(id int, data model.Customer) (int, error) {
+func (c showData) UpdatePasswordByEmail(email string, password string) (int, error) {
 	userRepository := repository.NewUsersRepository(c.db)
-	affectedRow, err := userRepository.UpdateUserByID(id, data)
+	hashedPasswordBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return -1, err
 	}
-	return affectedRow, nil
-}
 
-func (c showData) UpdateUserByEmail(email string, data model.Customer) (int, error) {
-	userRepository := repository.NewUsersRepository(c.db)
-	affectedRow, err := userRepository.UpdateUserByEmail(email, data)
+	// แปลง []byte -> string
+	hashedPassword := string(hashedPasswordBytes)
+	//update
+	affectedRow, err := userRepository.UpdatePasswordByEmail(email, hashedPassword)
+
 	if err != nil {
 		return -1, err
 	}
@@ -102,13 +100,4 @@ func (c showData) GetAllUsers() *[]model.Customer {
 		fmt.Printf("%v", v)
 	}
 	return dataUser
-}
-
-func (c showData) GetUserById(id int) (*model.Customer, error) {
-	userRepository := repository.NewUsersRepository(c.db)
-	user, err := userRepository.GetUserByID(id)
-	if err != nil {
-		return nil, err
-	}
-	return user, nil
 }

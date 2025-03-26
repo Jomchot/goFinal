@@ -18,10 +18,8 @@ func NewUsers(router *gin.Engine, gormdb *gorm.DB) {
 	user := router.Group("/user")
 	{
 		user.GET("", getAllUsers)
-		user.GET("/id", getUserById)
 		user.POST("", insertUser)
-		user.PATCH("", updateUserById)
-		user.PATCH("/email", updateUserByEmail)
+		user.PUT("/password", updatePassord)
 	}
 	auth := router.Group("/auth")
 	{
@@ -32,22 +30,6 @@ func NewUsers(router *gin.Engine, gormdb *gorm.DB) {
 func getAllUsers(ctx *gin.Context) {
 	service := service.NewUsersService(db)
 	getUser := service.GetAllUsers()
-	ctx.JSON(http.StatusOK, getUser)
-}
-
-func getUserById(ctx *gin.Context) {
-	idx := ctx.Query("id")
-	id, err := strconv.Atoi(idx)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error1": err.Error()})
-		return
-	}
-	service := service.NewUsersService(db)
-	getUser, error := service.GetUserById(id)
-	if error != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error1": err.Error()})
-		return
-	}
 	ctx.JSON(http.StatusOK, getUser)
 }
 
@@ -69,38 +51,20 @@ func postUserByEmail(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, userAuth)
 }
 
-func updateUserByEmail(ctx *gin.Context) {
+func updatePassord(ctx *gin.Context) {
 	user := model.Customer{}
 	err := ctx.ShouldBindJSON(&user) //รับค่าจาก body
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	// email := user.Email
 	service := service.NewUsersService(db)
-	updatedUser, err := service.UpdateUserByEmail(user.Email, user)
+	updatedUser, err := service.UpdatePasswordByEmail(user.Email, user.Password)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	ctx.JSON(http.StatusOK, updatedUser)
-}
-
-func updateUserById(ctx *gin.Context) {
-	user := model.Customer{}
-
-	idx := ctx.Query("id")
-	id, err := strconv.Atoi(idx)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error1": err.Error()})
-		return
-	}
-	err = ctx.ShouldBindJSON(&user)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error2": err.Error()})
-		return
-	}
-	service := service.NewUsersService(db)
-	updatedUser, err := service.UpdateUserByID(id, user)
 	ctx.JSON(http.StatusOK, updatedUser)
 }
 
